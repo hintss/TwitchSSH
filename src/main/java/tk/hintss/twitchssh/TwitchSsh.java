@@ -1,8 +1,10 @@
 package tk.hintss.twitchssh;
 
-import com.jcraft.jsch.*;
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
 
 /**
  * Created by Henry on 7/20/2014.
@@ -16,8 +18,6 @@ public class TwitchSsh {
     static String sshPw = "asdf";
 
     public static void main(String[] args) {
-
-
         ConcatInputStream keyInput = new ConcatInputStream();
 
         keyInput.addInputStream(new ByteArrayInputStream("screen -x twitch\r".getBytes()));
@@ -28,33 +28,34 @@ public class TwitchSsh {
 
         // begin jsch code stuff here vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-        try{
-            JSch jsch=new JSch();
+        try {
+            JSch jsch = new JSch();
 
-            Session session=jsch.getSession(sshUser, sshHost, 22);
+            Session session = jsch.getSession(sshUser, sshHost, 22);
 
             session.setPassword(sshPw);
 
             // It must not be recommended, but if you want to skip host-key check,
             // invoke following,
-             session.setConfig("StrictHostKeyChecking", "no");
+            session.setConfig("StrictHostKeyChecking", "no");
 
             //session.connect();
             session.connect(30000);   // making a connection with timeout.
 
-            Channel channel=session.openChannel("shell");
+            Channel channel = session.openChannel("shell");
 
             // Enable agent-forwarding.
             //((ChannelShell)channel).setAgentForwarding(true);
 
             channel.setInputStream(keyInput);
+
       /*
       // a hack for MS-DOS prompt on Windows.
-      channel.setInputStream(new FilterInputStream(System.in){
+          channel.setInputStream(new FilterInputStream(System.in){
           public int read(byte[] b, int off, int len)throws IOException{
             return in.read(b, off, (len>1024?1024:len));
           }
-        });
+      });
        */
 
             //channel.setOutputStream(System.out);
@@ -71,38 +72,8 @@ public class TwitchSsh {
       */
 
             //channel.connect();
-            channel.connect(3*1000);
-        }
-        catch(Exception e){
-            System.out.println(e);
-        }
-    }
-
-    public static void sendCmd(String cmd) {
-        try{
-            JSch jsch=new JSch();
-
-            Session session=jsch.getSession(sshUser, sshHost, 22);
-
-            session.setPassword(sshPw);
-
-            // It must not be recommended, but if you want to skip host-key check,
-            // invoke following,
-            session.setConfig("StrictHostKeyChecking", "no");
-
-            //session.connect();
-            session.connect(30000);   // making a connection with timeout.
-
-            Channel channel=session.openChannel("shell");
-
-            // Enable agent-forwarding.
-            //((ChannelShell)channel).setAgentForwarding(true);
-
-            channel.setInputStream(keyInput);
-            channel.setOutputStream(null);
-            channel.connect(3*1000);
-        }
-        catch(Exception e){
+            channel.connect(3 * 1000);
+        } catch (Exception e) {
             System.out.println(e);
         }
     }
